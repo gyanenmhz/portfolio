@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanendra Maharjan - VFX Artist</title>
+    <style>
+        /* --- Basic CSS Reset & Global Styles --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Smooth scrolling for nav links */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a; /* Very dark background */
+            color: #e0e0e0; /* Light grey text */
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scrollbars */
+        }
+
+        /* --- Three.js Canvas Styling --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+            display: block; /* Remove potential extra space below canvas */
+        }
+
+        /* --- Content Styling --- */
+        .content-wrapper {
+            position: relative; /* Needed to ensure content stays above the fixed canvas */
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header#hero {
+            min-height: 60vh; /* Give hero section some height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px;
+            border-bottom: 1px solid #333; /* Subtle separator */
+        }
+
+        header#hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem); /* Responsive font size */
+            margin-bottom: 0.2em;
+            color: #ffffff; /* White heading */
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5); /* Subtle glow */
+        }
+
+        header#hero p {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #00bcd4; /* Accent color */
+            font-weight: 300;
+        }
+
+        nav {
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent sticky nav */
+            padding: 10px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10; /* Ensure nav is above other content */
+            backdrop-filter: blur(5px); /* Frosted glass effect (optional) */
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin: 0 15px;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        nav a:hover, nav a:focus {
+            color: #ffffff;
+            background-color: #00bcd4;
+        }
+
+        section {
+            padding: 60px 20px;
+            margin-bottom: 30px;
+            background-color: rgba(20, 20, 20, 0.85); /* Slightly transparent dark sections */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            color: #00bcd4; /* Accent color for section headings */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- About Section --- */
+        #about {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #about img.profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 25px;
+            border: 3px solid #00bcd4;
+        }
+
+        #about p {
+            max-width: 700px; /* Limit paragraph width for readability */
+        }
+
+        /* --- Portfolio Section (Movie Posters) --- */
+        .portfolio-grid {
+            display: grid;
+            /* Adjust minmax width based on your poster aspect ratio/desired size */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        .portfolio-item {
+            background-color: #222; /* Darker item background */
+            border-radius: 6px;
+            overflow: hidden; /* Keep image corners rounded */
+            text-align: center;
+            padding-bottom: 15px; /* Space below text */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .portfolio-item:hover {
+             transform: translateY(-5px); /* Slight lift effect */
+             box-shadow: 0 8px 20px rgba(0, 188, 212, 0.3);
+        }
+
+        .portfolio-item img.poster {
+            width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Remove extra space below image */
+            /* Consider adding a fixed height and object-fit: cover if posters vary wildly */
+            /* height: 300px; object-fit: cover; */
+            border-bottom: 3px solid #00bcd4; /* Accent border */
+        }
+
+        .portfolio-item h3 {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .portfolio-item p {
+            font-size: 0.9rem;
+            color: #aaa;
+            padding: 0 10px; /* Add padding to description */
+        }
+
+        .portfolio-item a {
+            display: inline-block; /* Allows margin/padding */
+            margin-top: 10px;
+            padding: 6px 12px;
+            background-color: #00bcd4;
+            color: #111;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .portfolio-item a:hover {
+            background-color: #0097a7; /* Darker cyan on hover */
+        }
+
+
+        /* --- Contact Section --- */
+        #contact {
+            text-align: center;
+        }
+
+        #contact p {
+            margin-bottom: 15px;
+        }
+
+        #contact a {
+            color: #00bcd4;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        #contact a:hover {
+            color: #88ffff; /* Lighter cyan on hover */
+            text-decoration: underline;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            margin: 0 10px;
+            font-size: 1.1rem;
+            text-decoration: none; /* Remove underline from social links */
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #888;
+            border-top: 1px solid #333;
+        }
+
+        /* --- Basic Responsiveness --- */
+        @media (max-width: 600px) {
+            nav ul li {
+                margin: 0 8px; /* Reduce nav spacing */
+            }
+            section {
+                padding: 40px 15px;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            .portfolio-grid {
+                /* Adjust grid for smaller screens if needed, though auto-fit helps */
+                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                 gap: 15px;
+            }
+            #about img.profile-pic {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+    </style>
+
+    <!-- Three.js Import Map (uses CDN) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Canvas for Three.js Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content Area -->
+    <div class="content-wrapper">
+
+        <header id="hero">
+            <h1>Gyanendra Maharjan</h1>
+            <p>VFX Artist // Nepal</p>
+            <!-- Optional: Link to your reel -->
+            <!-- <a href="YOUR_REEL_LINK" target="_blank" class="reel-button">View Showreel</a> -->
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="about">
+                <h2>About Me</h2>
+                 <!-- === ADD YOUR PHOTO HERE === -->
+                <img src="https://th.bing.com/th/id/OIP.ayLR3s_gwq5dtKd4Z2EAMgHaLH?rs=1&pid=ImgDetMain" alt="Gyanendra Maharjan Profile Picture" class="profile-pic">
+                 <!-- === ADD YOUR ABOUT TEXT HERE === -->
+                <p>
+                    Hello! I'm Gyanendra Maharjan, a passionate and dedicated Visual Effects Artist based in the beautiful country of Nepal.
+                    I specialize in [mention 2-3 key skills like Compositing, 3D Tracking, Simulation, Matte Painting, etc.].
+                    My goal is to bring imaginative worlds and seamless visual enhancements to the screen. I thrive on challenges and enjoy collaborating to achieve stunning results.
+                </p>
+                <p>
+                    I'm proficient in software like [mention key software: Nuke, Maya, Houdini, After Effects, Blender, etc.]. Always eager to learn and adapt to new technologies in the dynamic field of VFX.
+                </p>
+            </section>
+
+            <section id="portfolio">
+                <h2>Portfolio Highlights</h2>
+                <div class="portfolio-grid">
+
+                    <!-- === PORTFOLIO ITEM 1 (Movie Poster) === -->
+                    <div class="portfolio-item">
+                         <!-- === REPLACE with your poster image path === -->
+                        <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p22229698_b_v13_ac.jpg" alt="House of the Dragon (2022- )" class="poster">
+                         <!-- === REPLACE with movie title === -->
+                        <h3>House of the Dragon (2022- ))</h3>
+                         <!-- === REPLACE with your role/description === -->
+                        <p>My Role:VFX Compositor| Set Extention...</p>
+                         <!-- Optional: Link to breakdown/trailer -->
+                         <!-- <a href="#" target="_blank">View Details</a> -->
+                    </div>
+
+                    <!-- === PORTFOLIO ITEM 2 (Movie Poster) === -->
+                    <div class="portfolio-item">
+                        <!-- === REPLACE with your poster image path === -->
+                        <img src="https://m.media-amazon.com/images/M/MV5BZDI2MGYzYWMtZjVlNS00N2JlLTg0OTQtZWU3MDY5MmViYTg5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="The Sympathizer (2024)" class="poster">
+                         <!-- === REPLACE with movie title === -->
+                        <h3>The Sympathizer (2024)</h3>
+                         <!-- === REPLACE with your role/description === -->
+                        <p>VFX Compositor| Set Extention.</p>
+                         <!-- Optional: Link to breakdown/trailer -->
+                         <!-- <a href="#" target="_blank">View Details</a> -->
+                    </div>
+
+                    <!-- === PORTFOLIO ITEM 3 (Movie Poster) === -->
+                    <div class="portfolio-item">
+                        <!-- === REPLACE with your poster image path === -->
+                        <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p26083891_b_v13_aa.jpg" alt="S.W.A.T. (2017-2025)" class="poster">
+                         <!-- === REPLACE with movie title === -->
+                        <h3>S.W.A.T. (2017-2025)</h3>
+                         <!-- === REPLACE with your role/description === -->
+                        <p>VFX Artist: Digital Compositer.</p>
+                         <!-- Optional: Link to breakdown/trailer -->
+                         <!-- <a href="#" target="_blank">View Details</a> -->
+                    </div>
+
+                     <!-- === ADD MORE PORTFOLIO ITEMS AS NEEDED === -->
+                     <div class="portfolio-item">
+                        <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p17699280_b_v13_al.jpg" alt="Movie Title 4 Poster" class="poster">
+                        <h3>Locke & Key (2020-2022)</h3>
+                        <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="contact">
+                <h2>Get In Touch</h2>
+                <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+                <p>
+                     <!-- === REPLACE with your email === -->
+                    Email: <a href="mailto:gyanenmhz@gmail.com">gyanenmhz@gmail.com</a>
+                </p>
+                <!-- === Optional: Add Phone Number === -->
+                <!-- <p>Phone: +977 XXXXXXXXXX</p> -->
+
+                <div class="social-links">
+                     <!-- === REPLACE # with your actual profile links === -->
+                    <a href="https://www.linkedin.com/in/gyanenmhz/" target="_blank" title="LinkedIn">LinkedIn</a> |
+                    <a href="https://Facebook.com/gyanenmhzz" target="_blank" title="Facebook">Facebook</a> |
+                    <a href="https://vimeo.com/user15301248" target="_blank" title="Vimeo/YouTube">Vimeo</a>
+                    <!-- Add other relevant links (IMDb, Website, etc.) -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; <span id="year"></span> Gyanendra Maharjan. All Rights Reserved.</p>
+             <p>VFX Artist | Kathmandu, Nepal</p>
+        </footer>
+
+    </div> <!-- End of .content-wrapper -->
+
+
+    <!-- JavaScript for Three.js Background and Footer Year -->
+    <script type="module">
+        // Import Three.js using the import map defined in <head>
+        import * as THREE from 'three';
+
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg-canvas'),
+            antialias: true,
+            alpha: true // Make canvas background transparent initially
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(5); // Move camera back
+
+        // --- Particle System ---
+        const particleCount = 7000; // More particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3); // x, y, z
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            // Distribute particles in a wider, flatter area initially
+            positions[i] = (Math.random() - 0.5) * 30;  // x spread
+            positions[i + 1] = (Math.random() - 0.5) * 15; // y spread (less vertical)
+            positions[i + 2] = (Math.random() - 0.5) * 15; // z spread
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.015, // Smaller particles
+            color: 0x00bcd4, // Cyan accent color
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false, // Good for particles
+            sizeAttenuation: true // Particles smaller further away
+        });
+
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
+
+        // --- Subtle Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Very dim ambient
+        scene.add(ambientLight);
+        // Optional: Add a very subtle point light for slight variance
+        // const pointLight = new THREE.PointLight(0xeeeeff, 0.2);
+        // pointLight.position.set(2, 3, 4);
+        // scene.add(pointLight);
+
+        // --- Mouse Movement Interaction ---
+        let mouseX = 0;
+        let mouseY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - windowHalfX) * 0.001; // Reduced sensitivity
+            mouseY = (event.clientY - windowHalfY) * 0.001;
+        }
+        document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.00005; // Slow down time factor
+
+            // Gentle rotation
+            particleSystem.rotation.y = time * 0.5;
+            particleSystem.rotation.x = time * 0.2;
+
+            // Subtle camera sway based on mouse
+            camera.position.x += (mouseX - camera.position.x) * 0.02;
+            camera.position.y += (-mouseY - camera.position.y) * 0.02; // Inverted Y feels more natural sometimes
+            camera.lookAt(scene.position);
+
+            // Make particles slightly undulate (optional)
+            const positionsAttribute = particleSystem.geometry.attributes.position;
+             for (let i = 0; i < positionsAttribute.count; i++) {
+                const y = positionsAttribute.getY(i);
+                // Add a sine wave based on original x position and time for a wavy effect
+                 positionsAttribute.setY(i, y + Math.sin(i + time * 5) * 0.001 ); // Very subtle undulation
+             }
+            positionsAttribute.needsUpdate = true; // Important!
+
+
+            renderer.render(scene, camera);
+        }
+
+        // --- Handle Window Resize ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio); // Update pixel ratio on resize
+        }
+        window.addEventListener('resize', onWindowResize, false);
+
+        // --- Update Footer Year ---
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- Start Animation ---
+        animate();
+
+    </script>
+
+</body>
+</html>
