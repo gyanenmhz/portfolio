@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alphabet Word Weaver</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- jQuery UI (Needed for Draggable, Droppable, Effects) -->
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* --- CSS (Unchanged) --- */
+        :root {
+            --bg-color: #282c34;
+            --primary-text: #eee;
+            --accent-color: #61dafb;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --correct-color: #4CAF50;
+            --correct-border: #81C784;
+            --option-bg: #f0e68c;
+            --option-text: #333;
+            --option-selected-bg: #ffc107;
+            --option-selected-border: #ffa000;
+            --message-color: #ffeb3b;
+            --button-bg: #4a505a;
+            --button-hover-bg: #5a606a;
+            --difficulty-active-bg: var(--accent-color);
+            --difficulty-active-text: #1a1d21;
+            --blank-active-bg: rgba(97, 218, 251, 0.2);
+            --blank-active-border: var(--accent-color);
+            --droppable-hover-bg: rgba(97, 218, 251, 0.3); /* For drag hover */
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; background-color: var(--bg-color);
+            margin: 0; padding: 10px 5px; overflow: hidden;
+            position: relative; color: var(--primary-text);
+            -webkit-tap-highlight-color: transparent;
+        }
+        #background-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none;
+        }
+        #game-interface {
+             position: relative; z-index: 10;
+             display: flex; flex-direction: column; align-items: center;
+             gap: 15px; padding: 0 10px; width: 100%; max-width: 700px;
+        }
+        h1#game-title { font-size: 2em; color: var(--accent-color); text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); margin-bottom: 5px; text-align: center; }
+        #difficulty-selection { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .difficulty-btn { padding: 9px 18px; font-size: 0.95em; font-weight: bold; color: var(--primary-text); background-color: var(--button-bg); border: 1px solid var(--accent-color); border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s ease; }
+        .difficulty-btn:hover { background-color: var(--button-hover-bg); transform: translateY(-1px); }
+        .difficulty-btn:active { transform: translateY(0px); }
+        .difficulty-btn.active { background-color: var(--difficulty-active-bg); color: var(--difficulty-active-text); border-color: var(--difficulty-active-bg); transform: translateY(0px); cursor: default; }
+
+        #game-area {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 15px; width: 100%;
+            background: none; padding: 0; border: none; box-shadow: none;
+        }
+        #game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; padding: 5px; margin-bottom: 15px; background-color: rgba(0,0,0,0.2); border-radius: 6px; }
+        #level-indicator { font-size: 1.4em; font-weight: bold; color: var(--accent-color); background-color: rgba(0, 0, 0, 0.3); padding: 4px 12px; border-radius: 5px; }
+        #skip-button { padding: 7px 15px; font-size: 0.9em; color: var(--primary-text); background-color: var(--button-bg); border: 1px solid var(--primary-text); border-radius: 5px; cursor: pointer; transition: background-color 0.2s ease; }
+        #skip-button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        #skip-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #game-container { display: flex; justify-content: center; align-items: center; width: 100%; }
+        #word-display { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; min-height: 55px; padding: 10px; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
+        .letter-fixed, .letter-blank { display: inline-flex; justify-content: center; align-items: center; width: 45px; height: 45px; font-size: 22px; font-weight: bold; border: 2px solid var(--accent-color); border-radius: 6px; background-color: #3a3f4a; color: var(--primary-text); user-select: none; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .letter-blank { background-color: rgba(0, 0, 0, 0.2); border-style: dashed; border-color: #aaa; color: transparent; cursor: pointer; }
+        .letter-blank.active-target { background-color: var(--blank-active-bg); border-color: var(--blank-active-border); border-style: solid; cursor: pointer; }
+        .letter-blank.ui-droppable-hover { background-color: var(--droppable-hover-bg) !important; border-color: #fff !important; border-style: dashed !important; }
+        .letter-blank.filled { background-color: var(--correct-color); border-color: var(--correct-border); border-style: solid; color: #fff; cursor: default; animation: popIn 0.3s ease-out; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0.5; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1.0); } }
+
+        .floating-letter {
+            position: fixed; display: flex; justify-content: center; align-items: center;
+            width: 48px; height: 48px; font-size: 20px; font-weight: bold;
+            border: 1px solid #aaa; border-radius: 8px;
+            background-color: var(--option-bg); color: var(--option-text);
+            cursor: grab; user-select: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+            z-index: 50; transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .floating-letter.selected {
+            background-color: var(--option-selected-bg); border-color: var(--option-selected-border);
+            transform: scale(1.15); box-shadow: 3px 3px 8px rgba(0,0,0,0.6); z-index: 51;
+            cursor: pointer;
+        }
+        .floating-letter.ui-draggable-dragging { z-index: 100 !important; opacity: 0.75; cursor: grabbing; box-shadow: 4px 4px 10px rgba(0,0,0,0.5); }
+
+        #message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: bold; color: var(--message-color); text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); z-index: 110; display: none; background-color: rgba(0, 0, 0, 0.65); padding: 20px 35px; border-radius: 10px; text-align: center; animation: fadeInScale 0.5s ease-out forwards; }
+        @keyframes fadeInScale { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } }
+        #message.fade-out { animation: fadeOutScale 0.5s ease-in forwards; }
+        @keyframes fadeOutScale { from { opacity: 1; transform: translate(-50%, -50%) scale(1.0); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="background-canvas"></canvas>
+
+    <div id="game-interface">
+        <h1 id="game-title">Alphabet Word Weaver</h1>
+        <div id="difficulty-selection">
+             <button class="difficulty-btn" data-difficulty="simple">Simple</button>
+             <button class="difficulty-btn" data-difficulty="beginner">Beginner</button>
+             <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        </div>
+        <div id="game-area">
+             <div id="game-header">
+                  <div id="level-indicator">Level: 1</div>
+                  <button id="skip-button">Skip Level</button>
+             </div>
+             <div id="game-container">
+                  <div id="word-display"></div>
+             </div>
+        </div>
+    </div>
+
+    <div id="message" class="hidden">Correct!</div>
+
+    <script>
+        $(document).ready(function() {
+            // --- Game Variables ---
+            const wordList = {
+                // *** REVISED: Simple list with very basic words ***
+                simple: {
+                    A: ["ANT", "APE", "ARM", "ART", "ASK", "AXE", "ADD"], // Added APPLE if desired, but it's longer
+                    B: ["BAG", "BAT", "BED", "BEE", "BIG", "BOX", "BOY", "BUG", "BUS", "BALL"], // Added BALL
+                    C: ["CAB", "CAN", "CAP", "CAR", "CAT", "COW", "CUP", "CUT", "CAKE"], // Added CAKE
+                    D: ["DAD", "DAY", "DIG", "DIP", "DOG", "DOT", "DUCK"], // Added DUCK
+                    E: ["EAR", "EAT", "EGG", "END", "EYE"],
+                    F: ["FAN", "FAR", "FAT", "FIN", "FIX", "FLY", "FOG", "FOR", "FOX", "FUN", "FISH"], // Added FISH
+                    G: ["GAP", "GAS", "GET", "GUM", "GUN", "GOAT"], // Added GOAT
+                    H: ["HAD", "HAM", "HAS", "HAT", "HEN", "HER", "HIM", "HIS", "HIT", "HOP", "HOT", "HUG", "HUT", "HAND"], // Added HAND
+                    I: ["ICE", "IF", "ILL", "IN", "INK", "ITS"],
+                    J: ["JAM", "JAR", "JET", "JOG", "JUG", "JUMP"], // Added JUMP
+                    K: ["KEY", "KID", "KIN", "KITE"], // Added KITE
+                    L: ["LAB", "LAD", "LAP", "LEG", "LET", "LID", "LIP", "LOG", "LOT", "LOW", "LION"], // Added LION
+                    M: ["MAD", "MAN", "MAP", "MAT", "MEN", "MIX", "MOM", "MUD", "MUG", "MOON"], // Added MOON
+                    N: ["NAP", "NET", "NEW", "NIB", "NOD", "NOT", "NOW", "NUN", "NUT", "NOSE"], // Added NOSE
+                    O: ["OAK", "OAR", "ODD", "OFF", "OLD", "ON", "ONE", "OUT", "OWL", "OWN", "OX"],
+                    P: ["PAD", "PAN", "PAT", "PEN", "PET", "PIG", "PIN", "PIT", "POD", "POP", "POT", "PUT", "PIE"], // Added PIE
+                    // Q: ["QUIT"], // Maybe keep Q simple or skip? Adding QUEEN is longer.
+                    R: ["RAG", "RAM", "RAN", "RAT", "RAW", "RED", "RIB", "RID", "RIG", "RIP", "ROB", "ROD", "ROW", "RUB", "RUG", "RUN", "RAT"], // Added RAT
+                    S: ["SAD", "SAG", "SAP", "SAT", "SAW", "SAY", "SEA", "SEE", "SET", "SEW", "SIX", "SKY", "SOB", "SON", "SUN", "STAR"], // Added STAR
+                    T: ["TAG", "TAN", "TAP", "TAR", "TEA", "TEN", "TIE", "TIN", "TIP", "TOE", "TOP", "TOY", "TRY", "TUB", "TUG", "TREE"], // Added TREE
+                    U: ["UP", "US", "USE", "URN"], // Added URN back, Umbrella is long
+                    V: ["VAN", "VAT", "VET"], // Very few simple V words
+                    W: ["WAG", "WAR", "WAS", "WAX", "WAY", "WEB", "WED", "WET", "WHO", "WHY", "WIG", "WIN", "WOK", "WON", "WOLF"], // Added WOLF
+                    X: ["BOX", "FIX", "FOX", "MIX", "SIX", "WAX", "AXE"], // Using words with X in them
+                    Y: ["YAK", "YAM", "YAP", "YAY", "YES", "YET", "YOU"],
+                    Z: ["ZAP", "ZIP", "ZOO"]
+                },
+                beginner: ["APPLE", "BEACH", "CHAIR", "DREAM", "EAGLE", "FANCY", "GLASS", "HEART", "IMAGE", "JELLY", "LEMON", "MAGIC", "NURSE", "OCEAN", "PIANO", "RIVER", "SNAKE", "TABLE", "WATCH", "ZEBRA", "BREAD", "CLOUD", "DANCE", "EARTH", "FIELD"],
+                hard: ["COMPUTER", "KEYBOARD", "JAVASCRIPT", "DIFFICULT", "CHALLENGE", "BACKGROUND", "ANIMATION", "CELEBRATE", "INTERACTIVE", "PARTICLE", "ALPHABET", "BEGINNER", "LIBRARY", "FRAMEWORK", "ABSOLUTE", "POSITION", "VARIABLE", "FUNCTION", "ELEMENT", "ATTRIBUTE", "SELECTOR", "PROPERTY", "RENDERER", "GEOMETRY", "MATERIAL"]
+            };
+            // *** MODIFIED: Set default difficulty to 'simple' ***
+            let currentDifficulty = 'simple';
+            let currentWordList = [];
+            let currentWord = "";
+            let middleLetters = [];
+            let correctBlanks = 0;
+            let totalBlanks = 0;
+            let level = 1; // Still used for beginner/hard
+            let wordsUsedInLevel = [];
+            let selectedLetter = null;
+            let $selectedOptionElement = null;
+            let animationFrameId = null;
+            let isFloatingAnimationRunning = false;
+
+            // State for Simple A-Z progression
+            let simpleLevelState = {
+                currentLetterIndex: 0,
+                alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                usedWordsPerLetter: {}
+            };
+
+            // --- jQuery Selectors ---
+            const $difficultyButtons = $('.difficulty-btn');
+            const $gameArea = $('#game-area');
+            const $levelIndicator = $('#level-indicator');
+            const $skipButton = $('#skip-button');
+            const $wordDisplay = $('#word-display');
+            const $message = $('#message');
+            const $backgroundCanvas = $('#background-canvas');
+            const $body = $('body');
+
+            // --- Three.js Setup & Animation ---
+            // ... (Three.js functions remain the same) ...
+             let scene, camera, renderer, particles, particleMaterial;
+             let mouseX = 0, mouseY = 0; let windowHalfX = window.innerWidth / 2; let windowHalfY = window.innerHeight / 2;
+             const particleCount = 1500; let baseParticleSpeed = 0.005; let currentParticleSpeed = baseParticleSpeed;
+             let isCelebrating = false; let celebrationEndTime = 0; const celebrationDuration = 2000; const celebrationSpeedMultiplier = 8;
+             function initThreeJS() { try { scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 3000); camera.position.z = 1000; renderer = new THREE.WebGLRenderer({ canvas: $backgroundCanvas[0], alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setClearColor(0x000000, 0); const geometry = new THREE.BufferGeometry(); const positions = new Float32Array(particleCount * 3); const colors = new Float32Array(particleCount * 3); const velocities = []; const color = new THREE.Color(); for (let i = 0; i < particleCount; i++) { const i3 = i * 3; positions[i3] = Math.random() * 2000 - 1000; positions[i3 + 1] = Math.random() * 2000 - 1000; positions[i3 + 2] = Math.random() * 2000 - 1000; color.setHSL(Math.random() * 0.2 + 0.55, 0.8, 0.6); colors[i3] = color.r; colors[i3 + 1] = color.g; colors[i3 + 2] = color.b; velocities.push({ x: Math.random() - 0.5, y: Math.random() - 0.5, z: Math.random() - 0.5 }); } geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3)); geometry.userData.velocities = velocities; particleMaterial = new THREE.PointsMaterial({ size: 5, vertexColors: true, transparent: true, opacity: 0.7, sizeAttenuation: true }); particles = new THREE.Points(geometry, particleMaterial); scene.add(particles); document.addEventListener('mousemove', onDocumentMouseMove, false); window.addEventListener('resize', onWindowResize, false); animateBackground(); console.log("Three.js initialized successfully."); } catch (error) { console.error("Error initializing Three.js:", error); $backgroundCanvas.hide(); } }
+             function onWindowResize() { if (!camera || !renderer) return; windowHalfX = window.innerWidth / 2; windowHalfY = window.innerHeight / 2; camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+             function onDocumentMouseMove(event) { mouseX = event.clientX - windowHalfX; mouseY = event.clientY - windowHalfY; }
+             function animateBackground() { if (!renderer || !scene || !camera || !particles ) return; requestAnimationFrame(animateBackground); const positions = particles.geometry.attributes.position.array; const velocities = particles.geometry.userData.velocities; camera.position.x += (mouseX - camera.position.x) * 0.01; camera.position.y += (-mouseY - camera.position.y) * 0.01; camera.lookAt(scene.position); if (isCelebrating && Date.now() > celebrationEndTime) { isCelebrating = false; currentParticleSpeed = baseParticleSpeed; $message.addClass('fade-out'); setTimeout(() => { $message.addClass('hidden').removeClass('fade-out'); loadNewWord(true); }, 500); } const effectiveSpeed = isCelebrating ? currentParticleSpeed * celebrationSpeedMultiplier : currentParticleSpeed; if(particleMaterial) particleMaterial.size = isCelebrating ? 8 : 5; for (let i = 0; i < particleCount; i++) { const i3 = i * 3; const vel = velocities[i]; positions[i3] += vel.x * effectiveSpeed * 100; positions[i3 + 1] += vel.y * effectiveSpeed * 100; positions[i3 + 2] += vel.z * effectiveSpeed * 100; if (positions[i3] > 1000 || positions[i3] < -1000) vel.x *= -1; if (positions[i3 + 1] > 1000 || positions[i3 + 1] < -1000) vel.y *= -1; if (positions[i3 + 2] > 1000 || positions[i3 + 2] < -1000) vel.z *= -1; } particles.geometry.attributes.position.needsUpdate = true; renderer.render(scene, camera); }
+             function startCelebration() { console.log("Starting celebration for Level", currentDifficulty === 'simple' ? simpleLevelState.alphabet[simpleLevelState.currentLetterIndex] : level); isCelebrating = true; celebrationEndTime = Date.now() + celebrationDuration; currentParticleSpeed = baseParticleSpeed; $skipButton.prop('disabled', true); stopFloatingLetterAnimation(); $('.floating-letter').remove(); resetLetterSelection(); $message.removeClass('hidden fade-out').show(); }
+
+
+            // --- Game Logic ---
+            function startGame(difficulty) {
+                console.log("Starting game with difficulty:", difficulty);
+                currentDifficulty = difficulty;
+                currentWordList = wordList[difficulty] || wordList['simple'];
+                level = 1;
+                wordsUsedInLevel = [];
+
+                if (difficulty === 'simple') {
+                    simpleLevelState.currentLetterIndex = 0;
+                    simpleLevelState.usedWordsPerLetter = {};
+                    // Initial indicator update happens in loadNewWord
+                }
+
+                $difficultyButtons.removeClass('active');
+                $difficultyButtons.filter(`[data-difficulty='${difficulty}']`).addClass('active');
+                $gameArea.css('display', 'flex');
+                removeFloatingLetters();
+                stopFloatingLetterAnimation();
+                loadNewWord(false); // Load first word/letter
+            }
+
+            function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
+            function generateLetterOptions(correctLetters) { const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; const uniqueCorrectLetters = [...new Set(correctLetters)]; const options = [...uniqueCorrectLetters]; const numDistractors = Math.min(5, 26 - uniqueCorrectLetters.length); while (options.length < uniqueCorrectLetters.length + numDistractors) { const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)]; if (!options.includes(randomLetter)) { options.push(randomLetter); } } return shuffleArray(options); }
+
+            // getRandomWord function (Handles Simple A-Z progression)
+            function getRandomWord() {
+                if (currentDifficulty === 'simple') {
+                    // Try to find a word for the current letter index onwards
+                    while (simpleLevelState.currentLetterIndex < simpleLevelState.alphabet.length) {
+                        const currentLetter = simpleLevelState.alphabet[simpleLevelState.currentLetterIndex];
+                        const wordsForCurrentLetter = currentWordList[currentLetter] || [];
+
+                        if (!simpleLevelState.usedWordsPerLetter[currentLetter]) {
+                            simpleLevelState.usedWordsPerLetter[currentLetter] = [];
+                        }
+
+                        const availableWords = wordsForCurrentLetter.filter(word =>
+                            !simpleLevelState.usedWordsPerLetter[currentLetter].includes(word)
+                        );
+
+                        if (availableWords.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * availableWords.length);
+                            const selectedWord = availableWords[randomIndex];
+                            simpleLevelState.usedWordsPerLetter[currentLetter].push(selectedWord);
+                            wordsUsedInLevel.push(selectedWord); // Optional global tracking
+                            console.log(`Simple Level: Picked '${selectedWord}' for letter ${currentLetter}`);
+                            return selectedWord.toUpperCase(); // Return the found word
+                        } else {
+                            // No more unused words for *this* letter, or no words defined. Move to the next letter.
+                            console.log(`Simple Level: No more unused words for letter ${currentLetter} or none defined. Moving to next letter.`);
+                            simpleLevelState.currentLetterIndex++;
+                        }
+                    }
+                    // If the loop finishes, we've gone through all letters
+                    console.log("Simple A-Z cycle complete or no more words found.");
+                    return "FINISH";
+
+                } else {
+                    // Beginner / Hard Level: Original random selection logic
+                    let availableWords = currentWordList.filter(word => !wordsUsedInLevel.includes(word));
+                    if (availableWords.length === 0) {
+                        console.warn(`All words used for difficulty: ${currentDifficulty}.`);
+                        return "FINISH";
+                    }
+                    const randomIndex = Math.floor(Math.random() * availableWords.length);
+                    const selectedWord = availableWords[randomIndex];
+                    wordsUsedInLevel.push(selectedWord);
+                    // Basic length check (can be adjusted)
+                    return selectedWord.length > 1 ? selectedWord.toUpperCase() : getRandomWord();
+                }
+            }
+
+
+            // Load Word, Display Word (Adds Droppable)
+             function loadNewWord(incrementLevelOrLetter) {
+                 if (isCelebrating && Date.now() < celebrationEndTime + 500) return;
+
+                 // Handle incrementing *before* getting the new word
+                 if (incrementLevelOrLetter) {
+                     if (currentDifficulty === 'simple') {
+                         simpleLevelState.currentLetterIndex++; // Advance to the next letter index
+                     } else {
+                         level++; // Advance to the next level number
+                     }
+                 }
+
+                 // Get the word for the current state (level or letter index)
+                 currentWord = getRandomWord();
+
+                 // Update level indicator based on the *current* state *after* potential increment
+                 if (currentDifficulty === 'simple') {
+                     if (currentWord !== "FINISH" && simpleLevelState.currentLetterIndex < simpleLevelState.alphabet.length) {
+                         const currentTargetLetter = simpleLevelState.alphabet[simpleLevelState.currentLetterIndex];
+                         $levelIndicator.text(`Letter: ${currentTargetLetter}`);
+                     } else {
+                         // Handle finish state or if getRandomWord returned FINISH immediately
+                         $levelIndicator.text("Finished!");
+                     }
+                 } else {
+                     $levelIndicator.text(`Level: ${level}`);
+                 }
+
+
+                 $skipButton.prop('disabled', false);
+                 resetLetterSelection();
+                 removeFloatingLetters();
+
+                 if (currentWord === "FINISH") {
+                    let message = currentDifficulty === 'simple'
+                        ? `Congrats! A-Z Complete!`
+                        : `Congrats! ${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)} Complete!`;
+                    $wordDisplay.html(`<h2 style='color: var(--message-color);'>${message}</h2>`);
+                    $skipButton.prop('disabled', true);
+                    stopFloatingLetterAnimation();
+                     if (currentDifficulty === 'simple') $levelIndicator.text("Finished!"); // Ensure final state shows finished
+                    return;
+                 }
+
+                 displayWord();
+                 createFloatingLetters();
+                 startFloatingLetterAnimation();
+             }
+
+             function displayWord() {
+                 $wordDisplay.empty();
+                 if (!currentWord || currentWord.length < 2) { // Ensure word is valid
+                     console.error("Invalid word received for display:", currentWord);
+                     // Optionally try loading again or show error
+                     $wordDisplay.html(`<p style='color: red;'>Error loading word.</p>`);
+                     $skipButton.prop('disabled', true); // Disable skip if error
+                     return;
+                 }
+                 $wordDisplay.append(`<div class="letter-fixed">${currentWord[0]}</div>`);
+                 middleLetters = currentWord.substring(1, currentWord.length - 1).split('');
+                 totalBlanks = middleLetters.length;
+                 correctBlanks = 0;
+                 middleLetters.forEach((letter, index) => {
+                     const $blank = $(`<div class="letter-blank" data-index="${index}" data-correct="${letter}"></div>`);
+                     $blank.droppable({
+                         accept: ".floating-letter",
+                         hoverClass: "ui-droppable-hover",
+                         drop: handleDrop
+                     });
+                     $wordDisplay.append($blank);
+                 });
+                 $wordDisplay.append(`<div class="letter-fixed">${currentWord[currentWord.length - 1]}</div>`);
+             }
+
+
+            // --- Floating Letter Creation (Adds Draggable) & Animation ---
+            // ... (removeFloatingLetters, createFloatingLetters, animateFloatingLetters, start/stopFloatingLetterAnimation remain the same) ...
+              function removeFloatingLetters() { $('.floating-letter').each(function() { if ($(this).data('ui-draggable')) { $(this).draggable('destroy'); } }); $('.floating-letter').remove(); }
+              function createFloatingLetters() { removeFloatingLetters(); const options = generateLetterOptions(middleLetters); const viewportWidth = window.innerWidth; const viewportHeight = window.innerHeight; const letterSize = 50; options.forEach(letter => { const $option = $(`<div class="floating-letter" data-letter="${letter}">${letter}</div>`); const initialTop = Math.random() * (viewportHeight - letterSize * 3) + letterSize; const initialLeft = Math.random() * (viewportWidth - letterSize * 3) + letterSize; const speed = 0.6 + Math.random() * 0.6; /* Slower speed */ const angle = Math.random() * Math.PI * 2; const velocity = { dx: Math.cos(angle) * speed, dy: Math.sin(angle) * speed }; $option.css({ top: initialTop + 'px', left: initialLeft + 'px' }); $option.data('velocity', velocity); $body.append($option); $option.draggable({ helper: "clone", revert: "invalid", containment: "body", appendTo: "body", zIndex: 100, start: function(event, ui) { resetLetterSelection(); $(ui.helper).addClass("ui-draggable-dragging"); } }); }); }
+              function animateFloatingLetters() { if (!isFloatingAnimationRunning) return; const $letters = $('.floating-letter'); const viewportWidth = window.innerWidth; const viewportHeight = window.innerHeight; const letterSize = 48; const boundaryPadding = 5; $letters.each(function() { const $letter = $(this); if ($letter.hasClass('ui-draggable-dragging') || $letter.hasClass('selected')) { return; } let currentPos = $letter.position(); let velocity = $letter.data('velocity'); if (!velocity) return; let newTop = currentPos.top + velocity.dy; let newLeft = currentPos.left + velocity.dx; if (newTop <= boundaryPadding) { newTop = boundaryPadding; velocity.dy *= -1; } else if (newTop >= viewportHeight - letterSize - boundaryPadding) { newTop = viewportHeight - letterSize - boundaryPadding; velocity.dy *= -1; } if (newLeft <= boundaryPadding) { newLeft = boundaryPadding; velocity.dx *= -1; } else if (newLeft >= viewportWidth - letterSize - boundaryPadding) { newLeft = viewportWidth - letterSize - boundaryPadding; velocity.dx *= -1; } $letter.data('velocity', velocity); $letter.css({ top: newTop + 'px', left: newLeft + 'px' }); }); animationFrameId = requestAnimationFrame(animateFloatingLetters); }
+              function startFloatingLetterAnimation() { if (!isFloatingAnimationRunning) { isFloatingAnimationRunning = true; animateFloatingLetters(); console.log("Floating animation started."); } }
+              function stopFloatingLetterAnimation() { if (isFloatingAnimationRunning) { cancelAnimationFrame(animationFrameId); isFloatingAnimationRunning = false; console.log("Floating animation stopped."); } }
+
+
+            // --- Interaction Logic (Click, Drag/Drop, Double-Click) ---
+            // ... (resetLetterSelection, handleFloatingLetterClick, handleBlankClick, handleFloatingLetterDoubleClick, handleDrop, placeCorrectLetter remain the same) ...
+             function resetLetterSelection() { selectedLetter = null; if ($selectedOptionElement) { $selectedOptionElement.removeClass('selected'); $selectedOptionElement = null; } $wordDisplay.find('.letter-blank').removeClass('active-target'); }
+             function handleFloatingLetterClick() { if (isCelebrating || $(this).hasClass('ui-draggable-dragging')) return; const $clickedElement = $(this); const clickedLetter = $clickedElement.data('letter'); if (selectedLetter === clickedLetter) { resetLetterSelection(); } else { resetLetterSelection(); selectedLetter = clickedLetter; $selectedOptionElement = $clickedElement; $selectedOptionElement.addClass('selected'); $wordDisplay.find('.letter-blank:not(.filled)').addClass('active-target'); } }
+             function handleBlankClick() { const $blank = $(this); if (selectedLetter && !$blank.hasClass('filled') && !isCelebrating) { const correctLetterForBlank = $blank.data('correct'); if (selectedLetter === correctLetterForBlank) { placeCorrectLetter($blank, $selectedOptionElement); } else { $blank.effect("shake", { times: 2, distance: 5 }, 200); resetLetterSelection(); } } }
+             function handleFloatingLetterDoubleClick() { if (isCelebrating || $(this).hasClass('ui-draggable-dragging')) return; const $doubleClickedLetter = $(this); const letterValue = $doubleClickedLetter.data('letter'); let placed = false; $wordDisplay.find('.letter-blank:not(.filled)').each(function() { const $blank = $(this); if ($blank.data('correct') === letterValue) { placeCorrectLetter($blank, $doubleClickedLetter); placed = true; return false; } }); if (!placed) { $doubleClickedLetter.effect("pulsate", { times: 1 }, 150); } }
+             function handleDrop(event, ui) { const $droppedLetter = $(ui.draggable); const $targetBlank = $(this); if ($targetBlank.hasClass('filled') || isCelebrating) { return false; } const droppedLetterValue = $droppedLetter.data('letter'); const correctLetterForBlank = $targetBlank.data('correct'); if (droppedLetterValue === correctLetterForBlank) { placeCorrectLetter($targetBlank, $droppedLetter); } else { $targetBlank.effect("shake", { times: 2, distance: 5 }, 200); return false; } }
+             function placeCorrectLetter($blank, $letterElement) { const letterValue = $letterElement.data('letter'); $blank.text(letterValue).addClass('filled').removeClass('active-target').droppable('disable'); correctBlanks++; $letterElement.remove(); resetLetterSelection(); if (correctBlanks === totalBlanks) { stopFloatingLetterAnimation(); $('.floating-letter').remove(); startCelebration(); /* Celebration will trigger loadNewWord(true) */ } }
+
+
+            // --- Event Handlers ---
+            $difficultyButtons.on('click', function() { const difficulty = $(this).data('difficulty'); stopFloatingLetterAnimation(); startGame(difficulty); });
+            $skipButton.on('click', function() {
+                if (isCelebrating || $(this).is(':disabled')) return;
+                console.log("Skipping level/letter:", currentDifficulty === 'simple' ? simpleLevelState.alphabet[simpleLevelState.currentLetterIndex] : level);
+                $(this).prop('disabled', true);
+                stopFloatingLetterAnimation();
+                removeFloatingLetters();
+                loadNewWord(true); // Pass 'true' to advance level/letter
+            });
+            $body.on('click', '.floating-letter', handleFloatingLetterClick);
+            $body.on('dblclick', '.floating-letter', handleFloatingLetterDoubleClick);
+            $wordDisplay.on('click', '.letter-blank', handleBlankClick);
+            $(document).on('click', function(e) { if (!$(e.target).closest('.floating-letter').length && !$(e.target).closest('.letter-blank').length) { if (selectedLetter) { resetLetterSelection(); } } });
+
+
+            // --- Initialization ---
+            initThreeJS();
+            // *** Start game on load with the default difficulty ('simple') ***
+            startGame(currentDifficulty);
+
+        });
+    </script>
+
+</body>
+</html>
