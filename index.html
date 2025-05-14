@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanendra Maharjan - VFX Artist | Click Here | </title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Swiper.js CSS (for 3D Slider) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Basic Reset & Global Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a0a0f; /* Dark background */
+            color: #e0e0e0;
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            position: relative;
+        }
+
+        h1, h2 { /* General h1, h2 from Aman.html */
+            font-family: 'Orbitron', sans-serif;
+            color: #00d1ff; /* Main accent color */
+            margin-bottom: 1rem;
+            text-shadow: 0 0 5px rgba(0, 209, 255, 0.5);
+        }
+        /* Specific h3 for general use */
+        h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00d1ff;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 5px rgba(0, 209, 255, 0.5);
+        }
+
+
+        p {
+            margin-bottom: 1rem;
+            color: #cccccc;
+        }
+
+        a {
+            color: #00d1ff; /* Main accent color */
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #ffffff;
+        }
+
+        section {
+            padding: 120px 5%;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(2px);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- Particle Background Container --- */
+        #particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-color: #050508;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* --- Header & Navigation --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(5, 5, 8, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 15px 5%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 209, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(0, 209, 255, 0.7);
+        }
+         .logo span {
+             color: #00d1ff; /* Main accent color */
+         }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul li {
+            margin-left: 25px;
+        }
+
+        nav ul li a {
+            font-size: 1rem;
+            font-weight: 400;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background-color: rgba(0, 209, 255, 0.2); /* Main accent color */
+            color: #ffffff;
+        }
+
+        /* --- Hero Section / About Section --- */
+        #about {
+            min-height: 100vh;
+            padding-top: 150px;
+        }
+        
+        #about img.profile-pic { /* Copied from index.html for profile pic styling */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 25px;
+            border: 3px solid #00d1ff; /* Main accent color */
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+         .hero-content h1 .artist-name {
+            display: block;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 209, 255, 0.8); /* Main accent color */
+         }
+
+        .hero-content .subtitle {
+            font-size: 1.5rem;
+            color: #00d1ff; /* Main accent color */
+            margin-bottom: 1.5rem;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .hero-content .location {
+             font-size: 1.1rem;
+             color: #aaa;
+             margin-bottom: 2rem;
+        }
+
+        .about-me-text-container { /* Container for Gyanen's about text */
+            margin-top: 3rem;
+            max-width: 800px;
+        }
+        .about-me-text-container h2 { /* About me H2 specific styling */
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+        .about-me-text-container p {
+            text-align: justify; /* For better readability of longer paragraphs */
+            margin-bottom: 1.5em;
+        }
+
+
+        /* --- Projects Section (#projects) --- */
+        #projects {
+            position: relative;
+        }
+        #projects h2 {
+            text-align: center;
+            margin-bottom: 20px; 
+            font-size: 2.2rem;
+            color: #00d1ff; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* NEW: Container for the two-column intro text */
+        .portfolio-intro-text-container {
+            display: flex;
+            justify-content: space-between; /* Distributes space between columns */
+            gap: 30px; /* Space between the two columns */
+            max-width: 850px; /* Adjusted width for two columns */
+            margin: 0 auto 40px auto; /* Center the container, add bottom margin */
+        }
+
+        /* NEW: Styling for each column of the intro text */
+        .portfolio-intro-column {
+            flex-basis: calc(50% - 15px); /* Each column takes up half the space minus half the gap */
+            color: #ccc;
+            font-size: 1.1rem;
+            text-align: justify; /* Justify text within each column */
+            margin-bottom: 0; /* Margin is handled by the container */
+        }
+
+
+        /* --- Swiper 3D Slider Styles --- */
+        .swiper-container.portfolio-slider {
+            width: 100%;
+            padding-top: 30px;
+            padding-bottom: 50px;
+            overflow: visible !important;
+        }
+
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 280px;
+            background-color: #18181c; 
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0, 0.4);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            min-height: 420px; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .swiper-slide-shadow-left,
+        .swiper-slide-shadow-right {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0));
+        }
+        .swiper-slide-shadow-right {
+             background-image: linear-gradient(to left, rgba(0,0,0,0.5), rgba(0,0,0,0));
+        }
+
+        .swiper-slide .portfolio-item-content {
+             text-align: center;
+             border-radius: 8px;
+             overflow: hidden;
+             display: flex;
+             flex-direction: column;
+             height: 100%;
+             flex-grow: 1;
+        }
+
+        .swiper-slide img.poster {
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 3px solid #00d1ff; 
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .swiper-slide h3 { 
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 1.2rem; 
+            color: #ffffff;
+            padding: 0 10px;
+            flex-shrink: 0;
+            font-family: 'Orbitron', sans-serif; 
+            text-shadow: none;
+        }
+
+        .swiper-slide p { 
+            font-size: 0.9rem;
+            color: #bbb; 
+            padding: 0 15px;
+            flex-grow: 1;
+            margin-bottom: 15px;
+            font-family: 'Roboto', sans-serif; 
+        }
+
+        /* Swiper Navigation Buttons */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #00d1ff; 
+            width: 30px !important;
+            height: 30px !important;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: absolute;
+            bottom: 15px !important;
+            top: auto !important;
+            transform: translateY(0%);
+            z-index: 10;
+        }
+
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 16px !important;
+            font-weight: bold;
+            color: #00d1ff; 
+        }
+
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background-color: rgba(0, 209, 255, 0.7); 
+        }
+         .swiper-button-next:hover::after,
+        .swiper-button-prev:hover::after {
+            color: #ffffff;
+        }
+
+        .swiper-button-prev {
+            left: calc(50% - 40px) !important;
+        }
+        .swiper-button-next {
+            right: calc(50% - 40px) !important;
+        }
+
+        /* --- Contact Section --- */
+        #contact {
+             background: linear-gradient(rgba(10, 10, 15, 0.8), rgba(5, 5, 8, 0.9));
+        }
+         #contact h2 {
+            text-align: center;
+            margin-bottom: 30px; 
+            font-size: 2.2rem;
+            color: #00d1ff; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .contact-content {
+            max-width: 700px; 
+        }
+
+        .contact-content p.email-intro { 
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .contact-content .email-link {
+            display: inline-block;
+            background-color: rgba(0, 209, 255, 0.1); 
+            border: 1px solid rgba(0, 209, 255, 0.3); 
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-bottom: 30px; 
+            font-weight: bold;
+        }
+        .contact-content .email-link:hover {
+            background-color: rgba(0, 209, 255, 0.3); 
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .social-links { 
+            margin-top: 20px;
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 15px; 
+        }
+        .social-links a {
+            font-size: 1.2rem; 
+            text-decoration: none;
+            color: #00d1ff; 
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: inline-flex; 
+            align-items: center; 
+        }
+        .social-links a:hover {
+            color: #88ffff; 
+            transform: scale(1.1);
+        }
+        .social-links i { 
+            margin-right: 8px; 
+            font-size: 1.4rem; 
+        }
+        .social-links .imdb-link-text { 
+        }
+
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 30px 20px; 
+            margin-top: 0;
+            background-color: #050508;
+            color: #888; 
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 5;
+            border-top: 1px solid #333; 
+        }
+         footer p { 
+             margin-bottom: 0.5em;
+             color: #888;
+         }
+
+
+         /* --- Responsive --- */
+         @media (max-width: 768px) {
+             header {
+                 flex-direction: column;
+                 padding: 10px 5%;
+             }
+             .logo { margin-bottom: 10px; }
+             nav ul { margin-top: 10px; }
+             nav ul li { margin-left: 15px; }
+
+             section { padding: 100px 5%; }
+             #about { padding-top: 120px; }
+
+             .hero-content h1 { font-size: 2.5rem; }
+             .hero-content .subtitle { font-size: 1.2rem; }
+             
+            /* Responsive for two-column intro text */
+            .portfolio-intro-text-container {
+                flex-direction: column; /* Stack columns */
+                gap: 20px; /* Adjust gap for stacked layout */
+                max-width: 90%; /* Container takes more width */
+            }
+            .portfolio-intro-column {
+                flex-basis: auto; /* Reset flex-basis */
+                font-size: 1rem;
+                text-align: center; /* Center text when stacked */
+            }
+
+
+             .swiper-slide {
+                width: 240px;
+            }
+             .swiper-slide img.poster {
+                 max-height: 300px;
+             }
+             .swiper-slide h3 { font-size: 1.1rem; }
+             .social-links { gap: 10px; } 
+             .social-links a { font-size: 1.1rem; }
+             .social-links i { font-size: 1.3rem; }
+         }
+
+         @media (max-width: 600px) {
+             nav ul li { margin: 0 8px; }
+             nav ul li a { font-size: 0.9rem; padding: 5px; }
+
+            h1 {font-size: 2.2rem;}
+            h2, #projects h2, .about-me-text-container h2, #contact h2 { font-size: 1.8rem; }
+
+
+            #about img.profile-pic {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .portfolio-intro-column { /* Further adjust font size for smaller screens */
+                font-size: 0.95rem;
+            }
+
+            .swiper-slide {
+                width: 200px;
+                min-height: 360px; 
+            }
+            .swiper-slide h3 {
+                 font-size: 1rem;
+            }
+             .swiper-slide p {
+                 font-size: 0.8rem;
+            }
+             .swiper-slide img.poster {
+                 max-height: 260px;
+             }
+            .swiper-button-prev {
+                 left: calc(50% - 35px) !important;
+            }
+            .swiper-button-next {
+                 right: calc(50% - 35px) !important;
+            }
+
+            .hero-content h1 { font-size: 2rem; }
+            .hero-content .subtitle { font-size: 1rem; }
+            .social-links a { font-size: 1rem; }
+            .social-links i { font-size: 1.2rem; margin-right: 5px;}
+         }
+         @media (max-width: 480px) {
+             nav ul li { margin-left: 10px; }
+             .hero-content h1 { font-size: 1.8rem; }
+             
+             .portfolio-intro-text-container { /* Adjust container width for very small screens */
+                max-width: 100%;
+             }
+             .portfolio-intro-column { /* Further adjust font size */
+                font-size: 0.9rem;
+             }
+             
+             .social-links { flex-direction: column; align-items: center; } 
+             .social-links a { margin-bottom: 10px; } 
+         }
+
+    </style>
+</head>
+<body>
+
+    <!-- Particle Background Container -->
+    <div id="particle-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">GYANEN<span>MHZ</span></div>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- About Section -->
+        <section id="about">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>VFX Artist <span class="artist-name">Gyanen MHZ</span></h1>
+                    <p class="subtitle">Senior VFX Artist | Compositing, 3D Tracking, Matte Painting</p>
+                    <p class="location">Based in Kathmandu, Nepal</p>
+                </div>
+
+                <img src="https://th.bing.com/th/id/OIP.ayLR3s_gwq5dtKd4Z2EAMgHaLH?rs=1&pid=ImgDetMain" alt="Gyanen MHZ Profile Picture" class="profile-pic">
+                
+                <div class="about-me-text-container">
+                    <h2>About Me</h2>
+                    <p>
+                        Hello! I'm Gyanendra Maharjan, a passionate and dedicated Visual Effects Artist based in the
+                        beautiful country Nepal, with over 11 years of industry experience. I specialize in Compositing, 3D Tracking, and Matte Painting, with
+                        a strong focus on bringing imaginative worlds to life and enhancing visuals with seamless detail.
+                    </p>
+                    <p>
+                        My goal is to bring imaginative worlds and seamless visual enhancements to the screen.
+                        I thrive on challenges and enjoy collaborating to achieve stunning results.
+                    </p>
+                    <p>
+                       With a deep enthusiasm for visual storytelling, I thrive on creative challenges and love collaborating
+                       with others to deliver stunning results. I'm highly proficient in industry-standard tools like Nuke, Blender,
+                        and After Effects, and I’m currently expanding my skills in Houdini and Maya. Always eager to grow,
+                        I stay curious and committed to learning new techniques and technologies in the ever-evolving world of VFX.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects">
+            <div class="container">
+                <h2>Portfolio Highlights</h2>
+                <!-- MODIFIED: portfolio-intro-text is now a two-column layout -->
+                <div class="portfolio-intro-text-container">
+                    <p class="portfolio-intro-column">
+                        Here’s a selection of projects I’ve had the privilege to contribute to, 
+                        each showcasing a variety of VFX work and my role in bringing these creative visions to life.
+                    </p>
+                    <p class="portfolio-intro-column">
+                        It was truly a rewarding experience working on these TV series and films, pushing creative boundaries and collaborating with talented teams.
+                    </p>
+                </div>
+
+                <div class="swiper-container portfolio-slider">
+                    <div class="swiper-wrapper">
+
+                        <!-- === PORTFOLIO ITEM 1 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p22229698_b_v13_ac.jpg" alt="House of the Dragon (2022)" class="poster">
+                                <h3>House of the Dragon (2022)</h3>
+                                <p>My Role: VFX Compositor | Set Extension...</p>
+                            </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 2 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://m.media-amazon.com/images/M/MV5BZDI2MGYzYWMtZjVlNS00N2JlLTg0OTQtZWU3MDY5MmViYTg5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="The Sympathizer (2024)" class="poster">
+                                <h3>The Sympathizer (2024)</h3>
+                                <p>VFX Compositor | Set Extension.</p>
+                             </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 3 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p26083891_b_v13_aa.jpg" alt="S.W.A.T. (2017-2025)" class="poster">
+                                <h3>S.W.A.T. (2017-2025)</h3>
+                                <p>VFX Artist: Digital Compositor.</p>
+                             </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 4 === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p17699280_b_v13_al.jpg" alt="Locke & Key (2020-2022) Poster" class="poster">
+                                <h3>Locke & Key (2020-2022)</h3>
+                                <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                            </div>
+                        </div>
+
+                         <!-- === PORTFOLIO ITEM 5 === -->
+                         <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://images.squarespace-cdn.com/content/v1/53f46bdce4b036d5df259e8c/1604908935106-RNX3DJBPQ3MC92AWRYUX/LostInSpace_03.jpg" alt="Lost in Space (2018) Poster" class="poster">
+                               <h3>Lost in Space (2018)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                         <!-- === PORTFOLIO ITEM 6 === -->
+                         <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://m.media-amazon.com/images/M/MV5BYWYzYmVmZjItNjZhZi00NzBjLWJmYWItNTljZjhmZDQxN2UxXkEyXkFqcGc@._V1_.jpg" alt="Gangs of London (2020-) Poster" class="poster">
+                               <h3>Gangs of London (2020-)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                        <!-- === PORTFOLIO ITEM 7 === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://m.media-amazon.com/images/M/MV5BY2NhZjQ4YTUtOTIwNC00NDljLWE0NWItNzRjZDk0YmY3MjhjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Away (2020-) Poster" class="poster">
+                               <h3>Away (2020-)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                        <!-- === PORTFOLIO ITEM 8 === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p11710290_b_v8_aa.jpg" alt="Mr. Robot (2019) Poster" class="poster">
+                               <h3>Mr. Robot (2019)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+                    </div> <!-- End swiper-wrapper -->
+
+                    <!-- Add Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div> <!-- End Swiper Container -->
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact">
+            <div class="container contact-content">
+                <h2>Get In Touch</h2>
+                <p class="email-intro">I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out via email or connect with me on social media.</p>
+                <a href="mailto:gyanenmhz@gmail.com?subject=VFX Project Inquiry" class="email-link">Contact via Email</a>
+                
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/gyanenmhz/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i> <span class="social-link-text">LinkedIn</span></a>
+                    <a href="https://facebook.com/gyanenmhzz" target="_blank" title="Facebook"><i class="fab fa-facebook-square"></i> <span class="social-link-text">Facebook</span></a>
+                    <a href="https://vimeo.com/user15301248" target="_blank" title="Vimeo"><i class="fab fa-vimeo-v"></i> <span class="social-link-text">Vimeo</span></a>
+                    <a href="https://www.imdb.com/name/nm5671435/" target="_blank" title="IMDb"><i class="fab fa-imdb"></i> <span class="social-link-text imdb-link-text">IMDb</span></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; <span id="current-year"></span> Gyanen MHZ. All Rights Reserved.</p>
+        <p>VFX Artist | Kathmandu, Nepal</p>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // --- Initialize Swiper ---
+        function initSwiper() {
+            const swiper = new Swiper('.portfolio-slider', {
+                effect: 'coverflow',
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: 'auto',
+                loop: true,
+                coverflowEffect: {
+                    rotate: 40,
+                    stretch: 0,
+                    depth: 150,
+                    modifier: 1,
+                    slideShadows: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                spaceBetween: 0,
+            });
+        }
+
+        $(document).ready(function() {
+            // --- Smooth Scrolling ---
+            $('nav a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if( target.length ) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top - $('header').outerHeight()
+                    }, 800);
+                }
+            });
+
+            // --- Update Footer Year ---
+            $('#current-year').text(new Date().getFullYear());
+
+            // --- Initialize Swiper for Portfolio section ---
+            initSwiper();
+
+            // --- Three.js Particle Background ---
+            let scene, camera, renderer, particles, textSprites = [];
+            const particleContainer = document.getElementById('particle-container');
+            const vfxWords = ['Roto', 'Cleanup', 'Comp', 'VFX', 'CGI', 'Track', 'Matchmove', 'Matte Paint', 'Nuke', 'Blender', 'AE', 'Houdini', 'Maya', 'Render', '3D', 'Particles', 'Sim'];
+
+            function initThreeJS() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 50;
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setClearColor(0x050508, 1);
+                particleContainer.appendChild(renderer.domElement);
+
+                const particleCount = 5000;
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                const baseColor = new THREE.Color(0x00d1ff); // Main accent color
+
+                for (let i = 0; i < particleCount; i++) {
+                    const i3 = i * 3;
+                    positions[i3] = (Math.random() - 0.5) * 150;
+                    positions[i3 + 1] = (Math.random() - 0.5) * 150;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 150;
+
+                    const colorVariance = (Math.random() - 0.5) * 0.3;
+                    const particleColor = baseColor.clone().offsetHSL(0, 0, colorVariance);
+                    colors[i3] = particleColor.r;
+                    colors[i3 + 1] = particleColor.g;
+                    colors[i3 + 2] = particleColor.b;
+                }
+
+                const particleGeometry = new THREE.BufferGeometry();
+                particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+                const particleMaterial = new THREE.PointsMaterial({
+                    size: 0.2,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.7,
+                    sizeAttenuation: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+
+                particles = new THREE.Points(particleGeometry, particleMaterial);
+                scene.add(particles);
+
+                const spriteCount = 50;
+                for (let i = 0; i < spriteCount; i++) {
+                    const word = vfxWords[Math.floor(Math.random() * vfxWords.length)];
+                    const sprite = createTextSprite(word);
+                    sprite.position.set(
+                        (Math.random() - 0.5) * 100,
+                        (Math.random() - 0.5) * 100,
+                        (Math.random() - 0.5) * 100
+                    );
+                     sprite.userData.velocity = new THREE.Vector3(
+                         (Math.random() - 0.5) * 0.02,
+                         (Math.random() - 0.5) * 0.02,
+                         (Math.random() - 0.5) * 0.02
+                     );
+                    scene.add(sprite);
+                    textSprites.push(sprite);
+                }
+
+                window.addEventListener('resize', onWindowResize, false);
+                animate();
+            }
+
+            function createTextSprite(text) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const fontSize = 60;
+                context.font = `bold ${fontSize}px Orbitron, sans-serif`;
+                const metrics = context.measureText(text);
+                const textWidth = metrics.width;
+                canvas.width = textWidth + 20;
+                canvas.height = fontSize + 10;
+                context.font = `bold ${fontSize}px Orbitron, sans-serif`;
+                context.fillStyle = "rgba(0, 209, 255, 0.8)"; // Main accent color
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.needsUpdate = true;
+
+                const material = new THREE.SpriteMaterial({
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.8,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+
+                const sprite = new THREE.Sprite(material);
+                const scaleFactor = 5;
+                sprite.scale.set((canvas.width/fontSize)*scaleFactor, (canvas.height/fontSize)*scaleFactor, 1.0);
+                return sprite;
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            }
+
+            const clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                if (particles) {
+                    particles.rotation.y = elapsedTime * 0.05;
+                    particles.rotation.x = elapsedTime * 0.02;
+                }
+
+                textSprites.forEach(sprite => {
+                     sprite.position.add(sprite.userData.velocity);
+                     const boundary = 70;
+                     if (Math.abs(sprite.position.x) > boundary) sprite.userData.velocity.x *= -1;
+                     if (Math.abs(sprite.position.y) > boundary) sprite.userData.velocity.y *= -1;
+                     if (Math.abs(sprite.position.z) > boundary) sprite.userData.velocity.z *= -1;
+                     sprite.rotation.z = Math.sin(elapsedTime * 0.5 + sprite.position.x * 0.1) * 0.1;
+                 });
+
+                renderer.render(scene, camera);
+            }
+
+            initThreeJS();
+
+        }); // End document ready
+    </script>
+
+</body>
+</html>
