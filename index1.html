@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanendra Maharjan - VFX Artist | Click Here | </title>
+
+    <!-- Swiper.js CSS (for 3D Slider) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style>
+        /* --- Basic CSS Reset & Global Styles --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Smooth scrolling for nav links */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a; /* Very dark background */
+            color: #e0e0e0; /* Light grey text */
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scrollbars */
+        }
+
+        /* --- Three.js Canvas Styling --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+            display: block; /* Remove potential extra space below canvas */
+        }
+
+        /* --- Content Styling --- */
+        .content-wrapper {
+            position: relative; /* Needed to ensure content stays above the fixed canvas */
+            z-index: 1;
+            max-width: 1100px; /* Slightly wider to accommodate slider */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header#hero {
+            min-height: 60vh; /* Give hero section some height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px;
+            border-bottom: 1px solid #333; /* Subtle separator */
+        }
+
+        header#hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem); /* Responsive font size */
+            margin-bottom: 0.2em;
+            color: #ffffff; /* White heading */
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5); /* Subtle glow */
+        }
+
+        header#hero p {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #00bcd4; /* Accent color */
+            font-weight: 300;
+        }
+
+        nav {
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent sticky nav */
+            padding: 10px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10; /* Ensure nav is above other content */
+            backdrop-filter: blur(5px); /* Frosted glass effect (optional) */
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin: 0 15px;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        nav a:hover, nav a:focus {
+            color: #ffffff;
+            background-color: #00bcd4;
+        }
+
+        section {
+            padding: 60px 20px;
+            margin-bottom: 30px;
+            background-color: rgba(20, 20, 20, 0.35); /* Slightly transparent dark sections */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            color: #00bcd4; /* Accent color for section headings */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- About Section --- */
+        #about {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #about img.profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 25px;
+            border: 3px solid #00bcd4;
+        }
+
+        #about p {
+            max-width: 700px; /* Limit paragraph width for readability */
+        }
+
+        /* --- Portfolio Section (Swiper 3D Slider) --- */
+        #portfolio {
+            padding-bottom: 80px; /* Add padding for slider navigation */
+            position: relative; /* Needed for positioning navigation buttons */
+            /* Overflow hidden might clip shadows from coverflow, be careful */
+            /* overflow: hidden; */
+        }
+
+        .swiper-container {
+            width: 100%;
+            padding-top: 30px; /* Space above slides */
+            padding-bottom: 50px; /* Space below slides for text/nav */
+            /* Ensure Swiper calculates dimensions correctly */
+            overflow: visible !important; /* Override Swiper's hidden overflow for coverflow shadows */
+
+        }
+
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 280px; /* Adjust width as needed */
+            /* Height will be determined by content or explicit height */
+            background-color: #222; /* Darker item background */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0, 0.4);
+            /* Add transition for smoother effect changes */
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            /* Make sure slides don't collapse */
+            min-height: 400px; /* Example minimum height, adjust as needed */
+            display: flex; /* Use flexbox for content alignment */
+            flex-direction: column; /* Stack content vertically */
+        }
+
+        /* Add styles for slide shadows if enabled in Swiper options */
+        .swiper-slide-shadow-left,
+        .swiper-slide-shadow-right {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0));
+        }
+        .swiper-slide-shadow-right {
+             background-image: linear-gradient(to left, rgba(0,0,0,0.5), rgba(0,0,0,0));
+        }
+
+
+        .swiper-slide .portfolio-item-content {
+             /* Removed padding-bottom, handle spacing with elements */
+             text-align: center;
+             border-radius: 8px; /* Match slide rounding */
+             overflow: hidden; /* Clip image corners */
+             display: flex;
+             flex-direction: column;
+             height: 100%; /* Make content fill slide height */
+             flex-grow: 1; /* Allow content to grow */
+        }
+
+
+        .swiper-slide img.poster {
+            width: 100%;
+            height: auto; /* Maintain aspect ratio initially */
+            max-height: 350px; /* Limit poster height */
+            object-fit: cover; /* Cover the area */
+            display: block;
+            border-bottom: 3px solid #00bcd4; /* Accent border */
+            border-top-left-radius: 8px; /* Rounded top corners */
+            border-top-right-radius: 8px;
+             flex-shrink: 0; /* Prevent image from shrinking */
+        }
+
+        .swiper-slide h3 {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: #ffffff;
+            padding: 0 10px;
+             flex-shrink: 0;
+        }
+
+        .swiper-slide p {
+            font-size: 0.9rem;
+            color: #aaa;
+            padding: 0 15px; /* Add padding to description */
+            flex-grow: 1; /* Allow paragraph to take available space */
+            margin-bottom: 15px;
+        }
+
+         /* Optional: Link style (if using links inside slides) */
+        .swiper-slide a.details-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background-color: #00bcd4;
+            color: #111;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px; /* Add space below button */
+             flex-shrink: 0;
+        }
+
+        .swiper-slide a.details-link:hover {
+            background-color: #0097a7;
+        }
+
+        /* Swiper Navigation Buttons */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #00bcd4; /* Accent color */
+            width: 30px !important; /* Override Swiper default */
+            height: 30px !important; /* Override Swiper default */
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: absolute; /* Position relative to swiper-container */
+            bottom: 15px !important; /* Position buttons at the bottom */
+            top: auto !important; /* Override default top positioning */
+            transform: translateY(0%); /* Adjust vertical alignment if needed */
+            z-index: 10; /* Ensure buttons are clickable */
+        }
+
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 16px !important; /* Smaller arrow icons */
+            font-weight: bold;
+            color: #00bcd4; /* Ensure icon color matches */
+        }
+
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background-color: rgba(0, 188, 212, 0.7);
+        }
+         .swiper-button-next:hover::after,
+        .swiper-button-prev:hover::after {
+            color: #ffffff; /* Change icon color on hover */
+        }
+
+        .swiper-button-prev {
+            left: calc(50% - 40px) !important; /* Position left button near center */
+        }
+
+        .swiper-button-next {
+            right: calc(50% - 40px) !important; /* Position right button near center */
+        }
+
+
+        /* --- Contact Section --- */
+        #contact {
+            text-align: center;
+        }
+
+        #contact p {
+            margin-bottom: 15px;
+        }
+
+        #contact a {
+            color: #00bcd4;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        #contact a:hover {
+            color: #88ffff; /* Lighter cyan on hover */
+            text-decoration: underline;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            margin: 0 10px;
+            font-size: 1.1rem;
+            text-decoration: none; /* Remove underline from social links */
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #888;
+            border-top: 1px solid #333;
+        }
+
+        /* --- Basic Responsiveness --- */
+        @media (max-width: 768px) {
+            .swiper-slide {
+                width: 240px; /* Smaller slides on smaller screens */
+            }
+             .swiper-slide img.poster {
+                 max-height: 300px;
+             }
+        }
+
+        @media (max-width: 600px) {
+            nav ul li {
+                margin: 0 8px; /* Reduce nav spacing */
+            }
+            section {
+                padding: 40px 15px;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            #about img.profile-pic {
+                width: 120px;
+                height: 120px;
+            }
+            .swiper-slide {
+                width: 200px; /* Even smaller slides */
+                min-height: 320px; /* Adjust min-height */
+            }
+            .swiper-slide h3 {
+                 font-size: 1rem;
+            }
+             .swiper-slide p {
+                 font-size: 0.8rem;
+            }
+             .swiper-slide img.poster {
+                 max-height: 260px;
+             }
+            .swiper-button-prev {
+                 left: calc(50% - 35px) !important;
+            }
+            .swiper-button-next {
+                 right: calc(50% - 35px) !important;
+            }
+        }
+
+    </style>
+
+    <!-- Three.js Import Map (uses CDN) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Canvas for Three.js Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content Area -->
+    <div class="content-wrapper">
+
+        <header id="hero">
+            <h1>Gyanendra Maharjan</h1>
+            <p>Senior VFX Artist |Kathamandu, Nepal.
+                <br/>Let's fix it in post.
+            </p>
+            <!-- Optional: Link to your reel -->
+            <!-- <a href="YOUR_REEL_LINK" target="_blank" class="reel-button">View Showreel</a> -->
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="about">
+                <h2>About Me</h2>
+                 <!-- === ADD YOUR PHOTO HERE === -->
+                <img src="https://th.bing.com/th/id/OIP.ayLR3s_gwq5dtKd4Z2EAMgHaLH?rs=1&pid=ImgDetMain" alt="Gyanendra Maharjan Profile Picture" class="profile-pic">
+                 <!-- === ADD YOUR ABOUT TEXT HERE === -->
+                 <p>
+                    Hello! I'm Gyanendra Maharjan, a passionate and dedicated Visual Effects Artist based in the 
+                    beautiful country Nepal. I specialize in Compositing, 3D Tracking, and Matte Painting, with
+                    a strong focus on bringing imaginative worlds to lifeand enhancing visuals with seamless detail.  
+                </p>
+            </br>
+                <p>
+                    My goal is to bring imaginative worlds and seamless visual enhancements to the screen. 
+                    I thrive on challenges and enjoy collaborating to achieve stunning results.
+                    </p>
+                 </br>
+                <p>
+                   With a deep enthusiasm for visual storytelling, I thrive on creative challenges and love collaborating 
+                   with others to deliver stunning results. I'm highly proficient in industry-standard tools like Nuke, Blender, 
+                    and After Effects, and I’m currently expanding my skills in Houdini and Maya. Always eager to grow, 
+                    I stay curious and committed to learning new techniques and technologies in the ever-evolving world of VFX.
+                    
+                </p>
+            </section>
+
+            <section id="portfolio">
+                <h2>Portfolio Highlights</h2>
+
+                <!-- Swiper Container -->
+                <!-- NOTE: Added the class 'portfolio-slider' here which is used in the JS selector -->
+                <div class="swiper-container portfolio-slider">
+                    <div class="swiper-wrapper">
+
+                        <!-- === PORTFOLIO ITEM 1 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p22229698_b_v13_ac.jpg" alt="House of the Dragon (2022)" class="poster">
+                                <h3>House of the Dragon (2022)</h3>
+                                <p>My Role: VFX Compositor | Set Extension...</p>
+                                <!-- Optional: <a href="#" target="_blank" class="details-link">View Details</a> -->
+                            </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 2 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://m.media-amazon.com/images/M/MV5BZDI2MGYzYWMtZjVlNS00N2JlLTg0OTQtZWU3MDY5MmViYTg5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="The Sympathizer (2024)" class="poster">
+                                <h3>The Sympathizer (2024)</h3>
+                                <p>VFX Compositor | Set Extension.</p>
+                             </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 3 (Movie Poster) === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p26083891_b_v13_aa.jpg" alt="S.W.A.T. (2017-2025)" class="poster">
+                                <h3>S.W.A.T. (2017-2025)</h3>
+                                <p>VFX Artist: Digital Compositor.</p>
+                             </div>
+                        </div>
+
+                        <!-- === PORTFOLIO ITEM 4 === -->
+                        <div class="swiper-slide">
+                             <div class="portfolio-item-content">
+                                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p17699280_b_v13_al.jpg" alt="Locke & Key (2020-2022) Poster" class="poster">
+                                <h3>Locke & Key (2020-2022)</h3>
+                                <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                            </div>
+                        </div>
+
+                         <!-- === ADD MORE PORTFOLIO SLIDES AS NEEDED === -->
+                         <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://images.squarespace-cdn.com/content/v1/53f46bdce4b036d5df259e8c/1604908935106-RNX3DJBPQ3MC92AWRYUX/LostInSpace_03.jpg" alt="Project 5 Poster" class="poster">
+                               <h3>Lost in Space (2018)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                         <!-- === ADD MORE PORTFOLIO SLIDES AS NEEDED === -->
+                         <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://m.media-amazon.com/images/M/MV5BYWYzYmVmZjItNjZhZi00NzBjLWJmYWItNTljZjhmZDQxN2UxXkEyXkFqcGc@._V1_.jpg" alt="Project 5 Poster" class="poster">
+                               <h3>Gangs of London (2020-)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                        <!-- === ADD MORE PORTFOLIO SLIDES AS NEEDED === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://m.media-amazon.com/images/M/MV5BY2NhZjQ4YTUtOTIwNC00NDljLWE0NWItNzRjZDk0YmY3MjhjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Project 5 Poster" class="poster">
+                               <h3>Away (2020-)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                        <!-- === ADD MORE PORTFOLIO SLIDES AS NEEDED === -->
+                        <div class="swiper-slide">
+                            <div class="portfolio-item-content">
+                               <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p11710290_b_v8_aa.jpg" alt="Project 5 Poster" class="poster">
+                               <h3>Mr. Robot (2019)</h3>
+                               <p>Responsible for cleanup, rotoscoping, and final compositing.</p>
+                           </div>
+                       </div>
+
+                    </div> <!-- End swiper-wrapper -->
+
+                    <!-- Add Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+
+                </div> <!-- End Swiper Container -->
+
+            </section>
+
+            <section id="contact">
+                <h2>Get In Touch</h2>
+                <!-- Temporary Disable <p> I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+                <p>
+                     <!-- === REPLACE with your email === -->
+                    Email: <a href="mailto:gyanenmhz@gmail.com">gyanenmhz@gmail.com</a>
+                </p>
+                <!-- === Optional: Add Phone Number === -->
+                <!-- <p>Phone: +977 XXXXXXXXXX</p> -->
+
+                <div class="social-links">
+                     <!-- === REPLACE # with your actual profile links === -->
+                    <a href="https://www.linkedin.com/in/gyanenmhz/" target="_blank" title="LinkedIn">LinkedIn</a> |
+                    <a href="https://Facebook.com/gyanenmhzz" target="_blank" title="Facebook">Facebook</a> |
+                    <a href="https://vimeo.com/user15301248" target="_blank" title="Vimeo/YouTube">Vimeo</a>
+                    <!-- Add other relevant links (IMDb, Website, etc.) -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; <span id="year"></span> Gyanendra Maharjan. All Rights Reserved.</p>
+             <p>VFX Artist | Kathmandu, Nepal</p>
+        </footer>
+
+    </div> <!-- End of .content-wrapper -->
+
+    <!-- Swiper.js JS - IMPORTANT: Load Swiper JS *before* the script that uses it -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- JavaScript for Three.js Background, Swiper Init, and Footer Year -->
+    <script type="module">
+        // Import Three.js using the import map defined in <head>
+        import * as THREE from 'three';
+
+        // --- Scene Setup ---
+        let scene, camera, renderer, particleSystem, clock; // Declare vars
+        let mouseX = 0, mouseY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+        const particleCount = 8000; // Adjusted count
+        const spread = 35; // Adjusted spread
+
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.querySelector('#bg-canvas'),
+                antialias: true,
+                alpha: true // Make canvas background transparent initially
+            });
+
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.position.setZ(10); // Move camera further back for better particle view
+
+            // --- Create Star Texture ---
+            function createStarTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const context = canvas.getContext('2d');
+
+                const gradient = context.createRadialGradient(
+                    canvas.width / 2, canvas.height / 2, 0,
+                    canvas.width / 2, canvas.height / 2, canvas.width / 2
+                );
+                gradient.addColorStop(0, 'rgba(255,255,255,1)');   // Center white
+                gradient.addColorStop(0.2, 'rgba(0,188,212,0.8)'); // Cyan glow
+                gradient.addColorStop(0.4, 'rgba(0,50,100,0.3)'); // Darker blue edge
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');      // Transparent outer edge
+
+                context.fillStyle = gradient;
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                return new THREE.CanvasTexture(canvas);
+            }
+            const starTexture = createStarTexture();
+
+
+            // --- Particle System ---
+            const particlesGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3); // x, y, z
+            const velocities = new Float32Array(particleCount * 3); // vx, vy, vz
+            const initialPositions = new Float32Array(particleCount * 3); // Store initial positions
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                // Initial position (more spread out)
+                positions[i3] = (Math.random() - 0.5) * spread * 1.5;
+                positions[i3 + 1] = (Math.random() - 0.5) * spread;
+                positions[i3 + 2] = (Math.random() - 0.5) * spread * 1.2;
+
+                initialPositions[i3] = positions[i3];
+                initialPositions[i3 + 1] = positions[i3 + 1];
+                initialPositions[i3 + 2] = positions[i3 + 2];
+
+                // Initial velocity
+                const velocityScale = 0.02 + Math.random() * 0.05;
+                 velocities[i3] = (Math.random() - 0.5) * velocityScale;
+                 velocities[i3 + 1] = (Math.random() - 0.5) * velocityScale;
+                 velocities[i3 + 2] = (Math.random() - 0.5) * velocityScale;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+            particlesGeometry.setAttribute('initialPosition', new THREE.BufferAttribute(initialPositions, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.08,
+                map: starTexture,
+                color: 0xFFFFFF,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                sizeAttenuation: true
+            });
+
+            particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particleSystem);
+
+            // --- Mouse Listener ---
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+            // --- Clock ---
+            clock = new THREE.Clock();
+
+             // --- Start Animation ---
+             animate(); // Start the animation loop only after setup
+
+        } // End of initThreeJS function
+
+
+        // --- Mouse Movement Interaction ---
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - windowHalfX) * 0.0005;
+            mouseY = (event.clientY - windowHalfY) * 0.0005;
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            if (!renderer) return; // Don't run if not initialized
+
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+
+            // --- Particle Movement & Emission Simulation ---
+            const posAttribute = particleSystem.geometry.attributes.position;
+            const velAttribute = particleSystem.geometry.attributes.velocity;
+            const initPosAttribute = particleSystem.geometry.attributes.initialPosition;
+            const resetDistanceSq = (spread / 1.8)**2;
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                // Update position
+                posAttribute.array[i3] += velAttribute.array[i3] * delta * 30;
+                posAttribute.array[i3 + 1] += velAttribute.array[i3 + 1] * delta * 30;
+                posAttribute.array[i3 + 2] += velAttribute.array[i3 + 2] * delta * 30;
+
+                // Boundary Check / Reset
+                const distSq = posAttribute.array[i3]**2 + posAttribute.array[i3+1]**2 + posAttribute.array[i3+2]**2;
+                if (distSq > resetDistanceSq) {
+                    // Reset closer to the center
+                     posAttribute.array[i3] = initPosAttribute.array[i3] * 0.1;
+                     posAttribute.array[i3+1] = initPosAttribute.array[i3+1] * 0.1;
+                     posAttribute.array[i3+2] = initPosAttribute.array[i3+2] * 0.1;
+
+                    // Give it a new random velocity upon reset
+                    const velocityScale = 0.02 + Math.random() * 0.05;
+                    velAttribute.array[i3] = (Math.random() - 0.5) * velocityScale;
+                    velAttribute.array[i3 + 1] = (Math.random() - 0.5) * velocityScale;
+                    velAttribute.array[i3 + 2] = (Math.random() - 0.5) * velocityScale;
+                }
+            }
+            posAttribute.needsUpdate = true; // Important!
+
+            // --- Camera Sway based on Mouse ---
+            camera.position.x += (mouseX * 10 - camera.position.x) * 0.02;
+            camera.position.y += (-mouseY * 10 - camera.position.y) * 0.02;
+            camera.lookAt(scene.position); // Keep looking at the center
+
+            renderer.render(scene, camera);
+        }
+
+        // --- Handle Window Resize ---
+        function onWindowResize() {
+             if (!camera || !renderer) return; // Don't run if not initialized
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+        window.addEventListener('resize', onWindowResize, false);
+
+        // --- Initialize Swiper ---
+        function initSwiper() {
+            const swiper = new Swiper('.portfolio-slider', { // Ensure class matches HTML
+                effect: 'coverflow',
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: 'auto',
+                loop: true,
+                coverflowEffect: {
+                    rotate: 40,
+                    stretch: 0,
+                    depth: 150,
+                    modifier: 1,
+                    slideShadows: true, // Enable shadows for the effect
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                 // Optional: Add some space between slides if needed
+                 spaceBetween: 0, // Adjust if slides overlap too much
+            });
+        }
+
+        // --- Update Footer Year ---
+        function updateFooterYear() {
+            const yearElement = document.getElementById('year');
+            if (yearElement) {
+               yearElement.textContent = new Date().getFullYear();
+            }
+        }
+
+        // --- Run Initializations ---
+        // Wait for the DOM to be fully loaded before initializing Swiper
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initSwiper();
+                initThreeJS(); // Initialize Three.js after DOM is ready
+                updateFooterYear();
+            });
+        } else {
+            // DOMContentLoaded has already fired
+            initSwiper();
+            initThreeJS(); // Initialize Three.js
+            updateFooterYear();
+        }
+
+    </script>
+
+</body>
+</html>
